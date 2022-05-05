@@ -36,7 +36,8 @@ function grepc_func_decl()
 	| grep '\.[ch]$' \
 	| xargs grep -l "\b$1\b" \
 	| sort \
-	| xargs pcregrep -Mn "(?s)^\w[\w\s*]+\s\**$1\([^;{]*?;" /dev/null \
+	| xargs pcregrep -Mn \
+	  "(?s)^[\w[][\w\s(,)[:\]*]+\s+\**$1\s*\([\w\s(,)[\]*]+?(...)?\)[\w\s(,)[:\]]*;" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
