@@ -1,0 +1,35 @@
+
+grepc
+-----
+
+This package contains grepc(1), a program to find C declarations
+and definitions in source code.
+
+It originated in NGINX Unit, based on code from the Linux
+man-pages <scripts/bash_aliases> file, as an internal tool for
+programmers; for that reason, it may fail to detect C code under
+different coding styles.  Patches are welcome to improve that.
+
+
+Send patches inline in email to the maintainer of the project
+and CC the NGINX Unit mailing list:
+
+  To: Alejandro Colomar <alx.manpages@gmail.com>
+  Cc: NGINX Unit <unit@nginx.org>
+
+Homepage (cgit):
+
+  <http://www.alejandro-colomar.es/src/alx/alx/grepc.git>
+
+Git repository (and mirror):
+
+  <git://www.alejandro-colomar.es/src/alx/alx/grepc.git>
+  <https://github.com/alejandro-colomar/grepc.git>
+
+License:
+
+  GPL-2.0
+
+--
+Alejandro Colomar
+<http://www.alejandro-colomar.es>
