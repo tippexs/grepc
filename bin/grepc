@@ -1,0 +1,141 @@
+#!/bin/bash
+
+
+function grepc_macro_simple()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "define $1\b[^(]" \
+	| sort \
+	| xargs pcregrep -Mn "(?s)define $1\b[^(].*?[^\\\\]$" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
+}
+
+
+function grepc_macro_func()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "define $1(" \
+	| sort \
+	| xargs pcregrep -Mn "(?s)define $1\(.*?[^\\\\]$" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
+}
+
+
+function grepc_macro()
+{
+	grepc_macro_simple $1;
+	grepc_macro_func $1;
+}
+
+
+function grepc_func_decl()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "\b$1\b" \
+	| sort \
+	| xargs pcregrep -Mn "(?s)^\w[\w\s*]+\s\**$1\([^;{]*?;" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
+}
+
+
+function grepc_func_def()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "^$1\b" \
+	| sort \
+	| xargs pcregrep -Mn "(?s)^\$[\w\s*]+?^$1\(.*?^}" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&/';
+}
+
+
+function grepc_func()
+{
+	grepc_func_decl $@;
+	grepc_func_def $@;
+}
+
+
+function grepc_type_struct_union_enum()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "$1 *{" \
+	| sort \
+	| xargs pcregrep -Mn "(?s)^\$[\w\s]+?$1 {.*?^}.*?;" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&/';
+}
+
+
+function grepc_type_typedef_oneline()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "^typedef .* $1;" \
+	| sort \
+	| xargs grep -n "^typedef .* $1;" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
+}
+
+
+function grepc_type_typedef_struct_union_enum()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "^} $1;" \
+	| sort \
+	| while read f; do
+		grep -n "^} $1;" $f /dev/null \
+		| sed -E 's/^([^: ]+:[0-9]+:).*/\n\n\1\n/';
+
+		tac <$f \
+		| sed -n "/^} $1;/,/^typedef/p" \
+		| tac;
+	done;
+}
+
+
+function grepc_type_typedef_underlying_struct_union_enum()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -h "^typedef .* *$1;" \
+	| sed -e 's/^typedef //' -e "s/ *$1;.*//" \
+	| while read t; do
+		grepc_type_struct_union_enum "$t";
+	done;
+}
+
+
+function grepc_type_typedef()
+{
+	grepc_type_typedef_oneline $1;
+	grepc_type_typedef_struct_union_enum $1;
+	grepc_type_typedef_underlying_struct_union_enum $1;
+}
+
+
+function grepc_type()
+{
+	grepc_type_struct_union_enum $1;
+	grepc_type_typedef $1;
+}
+
+
+function main()
+{
+	if (($# != 1)); then
+		>&2 echo "Usage: $0 <identifier>";
+		return 1;
+	fi;
+
+	grepc_macro $1;
+	grepc_func $1;
+	grepc_type $1;
+}
+
+
+main $@
