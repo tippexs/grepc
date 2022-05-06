@@ -67,6 +67,36 @@ function grepc_func()
 }
 
 
+function grepc_syscall_decl()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "\bsys_$1\b" \
+	| sort \
+	| xargs pcregrep -Mn \
+	  "(?s)^asmlinkage\s+[\w\s]+\**sys_$1\s*\(.*?\)" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
+}
+
+
+function grepc_syscall_def()
+{
+	find . -type f \
+	| grep '\.c$' \
+	| xargs grep -l "SYSCALL_DEFINE.($1\b" \
+	| sort \
+	| xargs pcregrep -Mn "(?s)^\w*SYSCALL_DEFINE.\($1\b.*?^}" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
+}
+
+
+function grepc_syscall()
+{
+	grepc_syscall_decl "$1";
+	grepc_syscall_def "$1";
+}
+
+
 function grepc_type_struct_union_enum()
 {
 	find . -type f \
@@ -139,6 +169,7 @@ function main()
 {
 	grepc_macro "$1";
 	grepc_func "$1";
+	grepc_syscall "$1";
 	grepc_type "$1";
 }
 
