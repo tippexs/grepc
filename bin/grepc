@@ -72,8 +72,9 @@ function grepc_type_struct_union_enum()
 	| grep '\.[ch]$' \
 	| xargs grep -l "\b$1\b" \
 	| sort \
-	| xargs pcregrep -Mn "(?s)^[\w\s]*?\b$1\b\s*[\w\s[\]]*{.*?^}.*?;" /dev/null \
-	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&/';
+	| xargs pcregrep -Mn \
+	  "(?s)^(struct|union|enum)\s+$1\b\s*[\w\s[\]]*{.*?^}.*?;" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
 
@@ -111,6 +112,7 @@ function grepc_type_typedef_underlying_struct_union_enum()
 	| grep '\.[ch]$' \
 	| xargs grep -h "^typedef .* *\b$1;" \
 	| sed -e 's/^typedef //' -e "s/ *\b$1;.*//" \
+	| sed -e 's/^struct //' -e 's/^union //' -e 's/^enum //' \
 	| while read t; do
 		grepc_type_struct_union_enum "$t";
 	done;
