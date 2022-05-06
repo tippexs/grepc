@@ -1,6 +1,12 @@
 #!/bin/bash
 
 
+if (($# != 1)); then
+	>&2 echo "Usage: $0 <identifier>";
+	exit 1;
+fi;
+
+
 function grepc_macro_simple()
 {
 	find . -type f \
@@ -25,8 +31,8 @@ function grepc_macro_func()
 
 function grepc_macro()
 {
-	grepc_macro_simple $1;
-	grepc_macro_func $1;
+	grepc_macro_simple "$1";
+	grepc_macro_func "$1";
 }
 
 
@@ -55,8 +61,8 @@ function grepc_func_def()
 
 function grepc_func()
 {
-	grepc_func_decl $@;
-	grepc_func_def $@;
+	grepc_func_decl "$1";
+	grepc_func_def "$1";
 }
 
 
@@ -113,30 +119,25 @@ function grepc_type_typedef_underlying_struct_union_enum()
 
 function grepc_type_typedef()
 {
-	grepc_type_typedef_oneline $1;
-	grepc_type_typedef_struct_union_enum $1;
-	grepc_type_typedef_underlying_struct_union_enum $1;
+	grepc_type_typedef_oneline "$1";
+	grepc_type_typedef_struct_union_enum "$1";
+	grepc_type_typedef_underlying_struct_union_enum "$1";
 }
 
 
 function grepc_type()
 {
-	grepc_type_struct_union_enum $1;
-	grepc_type_typedef $1;
+	grepc_type_struct_union_enum "$1";
+	grepc_type_typedef "$1";
 }
 
 
 function main()
 {
-	if (($# != 1)); then
-		>&2 echo "Usage: $0 <identifier>";
-		return 1;
-	fi;
-
-	grepc_macro $1;
-	grepc_func $1;
-	grepc_type $1;
+	grepc_macro "$1";
+	grepc_func "$1";
+	grepc_type "$1";
 }
 
 
-main $@
+main "$1";
