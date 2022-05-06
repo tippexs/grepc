@@ -109,8 +109,8 @@ function grepc_type_typedef_underlying_struct_union_enum()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -h "^typedef .* *$1;" \
-	| sed -e 's/^typedef //' -e "s/ *$1;.*//" \
+	| xargs grep -h "^typedef .* *\b$1;" \
+	| sed -e 's/^typedef //' -e "s/ *\b$1;.*//" \
 	| while read t; do
 		grepc_type_struct_union_enum "$t";
 	done;
