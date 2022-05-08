@@ -113,7 +113,7 @@ function grepc_type_struct_union_enum()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -lP "\b$1\b" \
+	| xargs grep -lP "\b(struct|union|enum)\s+$1\b" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)^([\w[][\w\s(,)[:\]*]+\s+)?\b(struct|union|enum)\s+$1\b\s*[\w\s[\]]*{.*?^}.*?;" /dev/null \
