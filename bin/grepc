@@ -52,11 +52,11 @@ function grepc_func_def()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "^$1\b" \
+	| xargs grep -l "\b$1\s*(" \
 	| sort \
 	| xargs pcregrep -Mn \
-	  "(?s)^[\w\s*]+?^$1\([\w\s(,)[\]*]+?(...)?\)\s*{.*?^}" /dev/null \
-	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&/';
+	  "(?s)^[\w[][\w\s(,)[:\]*]+\s+\**$1\s*\([\w\s(,)[\]*]+?(...)?\)\s*{.*?^}" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
 
