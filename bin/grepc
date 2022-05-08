@@ -40,7 +40,7 @@ function grepc_enum_constant()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -lP "\b$1\s*=" \
+	| xargs grep -lP "\b$1\s*[,=]" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)\benum\b\s*[\w\s[\]]*{[^}]*\b$1\s*[=,].*?^}.*?;" /dev/null \
