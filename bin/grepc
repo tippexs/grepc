@@ -11,7 +11,7 @@ function grepc_macro_simple()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "define\s\+$1\b[^(]" \
+	| xargs grep -lP "define\s+$1\b[^(]" \
 	| sort \
 	| xargs pcregrep -Mn "(?s)define\s+$1\b[^(].*?[^\\\\]$" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
@@ -22,7 +22,7 @@ function grepc_macro_func()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "define\s\+$1(" \
+	| xargs grep -lP "define\s+$1\(" \
 	| sort \
 	| xargs pcregrep -Mn "(?s)define\s+$1\(.*?[^\\\\]$" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
@@ -40,7 +40,7 @@ function grepc_enum_constant()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "\b$1\s*=" \
+	| xargs grep -lP "\b$1\s*=" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)\benum\b\s*[\w\s[\]]*{[^}]*\b$1\s*[=,].*?^}.*?;" /dev/null \
@@ -52,7 +52,7 @@ function grepc_func_decl()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "\b$1\b" \
+	| xargs grep -lP "\b$1\b" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)^[\w[][\w\s(,)[:\]*]+\s+\**$1\s*\([\w\s(,)[\]*]+?(...)?\)[\w\s(,)[:\]]*;" /dev/null \
@@ -64,7 +64,7 @@ function grepc_func_def()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "\b$1\s*(" \
+	| xargs grep -lP "\b$1\s*\(" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)^[\w[][\w\s(,)[:\]*]+\s+\**$1\s*\([\w\s(,)[\]*]+?(...)?\)\s*{.*?^}" /dev/null \
@@ -83,7 +83,7 @@ function grepc_syscall_decl()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "\bsys_$1\s*(" \
+	| xargs grep -lP "\bsys_$1\s*\(" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)^asmlinkage\s+[\w\s]+\**sys_$1\s*\(.*?\)" /dev/null \
@@ -95,7 +95,7 @@ function grepc_syscall_def()
 {
 	find . -type f \
 	| grep '\.c$' \
-	| xargs grep -l "SYSCALL_DEFINE.($1\b" \
+	| xargs grep -lP "SYSCALL_DEFINE.\($1\b" \
 	| sort \
 	| xargs pcregrep -Mn "(?s)^\w*SYSCALL_DEFINE.\($1\b.*?^}" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
@@ -113,7 +113,7 @@ function grepc_type_struct_union_enum()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "\b$1\b" \
+	| xargs grep -lP "\b$1\b" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)^(struct|union|enum)\s+$1\b\s*[\w\s[\]]*{.*?^}.*?;" /dev/null \
@@ -125,9 +125,9 @@ function grepc_type_typedef_oneline()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "^typedef .* $1;" \
+	| xargs grep -lP "^typedef .* $1;" \
 	| sort \
-	| xargs grep -n "^typedef .* $1;" /dev/null \
+	| xargs grep -nP "^typedef .* $1;" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
@@ -136,14 +136,14 @@ function grepc_type_typedef_struct_union_enum()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "^} $1;" \
+	| xargs grep -lP "^} $1;" \
 	| sort \
 	| while read f; do
-		grep -n "^} $1;" $f /dev/null \
+		grep -nP "^} $1;" $f /dev/null \
 		| sed -E 's/^([^: ]+:[0-9]+:).*/\n\n\1\n/';
 
 		tac <$f \
-		| sed -n "/^} $1;/,/^typedef/p" \
+		| pcregrep -Mh "(?s)^typedef\s.*^}\s*$1;" \
 		| tac;
 	done;
 }
@@ -153,8 +153,8 @@ function grepc_type_typedef_underlying_struct_union_enum()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -h "^typedef .* *\b$1;" \
-	| sed -e 's/^typedef //' -e "s/ *\b$1;.*//" \
+	| xargs grep -hP "^typedef .* *\b$1;" \
+	| sed -E -e 's/^typedef //' -e "s/ *\b$1;.*//" \
 	| sed -e 's/^struct //' -e 's/^union //' -e 's/^enum //' \
 	| while read t; do
 		grepc_type_struct_union_enum "$t";
