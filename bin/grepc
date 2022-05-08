@@ -71,7 +71,7 @@ function grepc_syscall_decl()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "\bsys_$1\b" \
+	| xargs grep -l "\bsys_$1\s*(" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)^asmlinkage\s+[\w\s]+\**sys_$1\s*\(.*?\)" /dev/null \
