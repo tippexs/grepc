@@ -36,6 +36,18 @@ function grepc_macro()
 }
 
 
+function grepc_enum_constant()
+{
+	find . -type f \
+	| grep '\.[ch]$' \
+	| xargs grep -l "\b$1\s*=" \
+	| sort \
+	| xargs pcregrep -Mn \
+	  "(?s)\benum\b\s*[\w\s[\]]*{[^}]*\b$1\s*[=,].*?^}.*?;" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
+}
+
+
 function grepc_func_decl()
 {
 	find . -type f \
@@ -168,6 +180,7 @@ function grepc_type()
 function main()
 {
 	grepc_macro "$1";
+	grepc_enum_constant "$1";
 	grepc_func "$1";
 	grepc_syscall "$1";
 	grepc_type "$1";
