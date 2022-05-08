@@ -52,7 +52,7 @@ function grepc_func_decl()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -lP "\b$1\b" \
+	| xargs grep -lP "\b$1\s*\(" \
 	| sort \
 	| xargs pcregrep -Mn \
 	  "(?s)^[\w[][\w\s(,)[:\]*]+\s+\**$1\s*\([\w\s(,)[\]*]+?(...)?\)[\w\s(,)[:\]]*;" /dev/null \
