@@ -147,9 +147,9 @@ function grepc_type_typedef_underlying_struct_union_enum()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -hP "^typedef .* *\b$1;" \
-	| sed -E -e 's/^typedef //' -e "s/ *\b$1;.*//" \
-	| sed -e 's/^struct //' -e 's/^union //' -e 's/^enum //' \
+	| xargs grep -hP "^typedef\s+.*\b$1;" \
+	| sed -E -e 's/^typedef\s+//' -e "s/\s*\**\b$1;.*//" \
+	| sed -E -e 's/^struct\s+//' -e 's/^union\s+//' -e 's/^enum\s+//' \
 	| while read t; do
 		grepc_type_struct_union_enum "$t";
 	done;
