@@ -116,7 +116,7 @@ function grepc_type_struct_union_enum()
 	| xargs grep -lP "\b$1\b" \
 	| sort \
 	| xargs pcregrep -Mn \
-	  "(?s)^(struct|union|enum)\s+$1\b\s*[\w\s[\]]*{.*?^}.*?;" /dev/null \
+	  "(?s)^([\w[][\w\s(,)[:\]*]+\s+)?\b(struct|union|enum)\s+$1\b\s*[\w\s[\]]*{.*?^}.*?;" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
