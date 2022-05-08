@@ -11,9 +11,9 @@ function grepc_macro_simple()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "define $1\b[^(]" \
+	| xargs grep -l "define\s\+$1\b[^(]" \
 	| sort \
-	| xargs pcregrep -Mn "(?s)define $1\b[^(].*?[^\\\\]$" /dev/null \
+	| xargs pcregrep -Mn "(?s)define\s+$1\b[^(].*?[^\\\\]$" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
@@ -22,9 +22,9 @@ function grepc_macro_func()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -l "define $1(" \
+	| xargs grep -l "define\s\+$1(" \
 	| sort \
-	| xargs pcregrep -Mn "(?s)define $1\(.*?[^\\\\]$" /dev/null \
+	| xargs pcregrep -Mn "(?s)define\s+$1\(.*?[^\\\\]$" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
