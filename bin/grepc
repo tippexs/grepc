@@ -121,13 +121,13 @@ function grepc_type_struct_union_enum()
 }
 
 
-function grepc_type_typedef_oneline()
+function grepc_type_typedef_simple()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -lP "^typedef .* $1;" \
+	| xargs grep -lP "\b$1;" \
 	| sort \
-	| xargs grep -nP "^typedef .* $1;" /dev/null \
+	| xargs pcregrep -Mn "(?s)^typedef\s+[^;]+$1;" /dev/null \
 	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
@@ -136,16 +136,10 @@ function grepc_type_typedef_struct_union_enum()
 {
 	find . -type f \
 	| grep '\.[ch]$' \
-	| xargs grep -lP "^} $1;" \
+	| xargs grep -lP "^}\s*$1;" \
 	| sort \
-	| while read f; do
-		grep -nP "^} $1;" $f /dev/null \
-		| sed -E 's/^([^: ]+:[0-9]+:).*/\n\n\1\n/';
-
-		tac <$f \
-		| pcregrep -Mh "(?s)^typedef\s.*^}\s*$1;" \
-		| tac;
-	done;
+	| xargs pcregrep -Mn "(?s)^typedef\s(?:(?!^}).)*^}\s*$1;" /dev/null \
+	| sed -E 's/^[^: ]+:[0-9]+:/\n\n&\n\n/';
 }
 
 
@@ -164,7 +158,7 @@ function grepc_type_typedef_underlying_struct_union_enum()
 
 function grepc_type_typedef()
 {
-	grepc_type_typedef_oneline "$1";
+	grepc_type_typedef_simple "$1";
 	grepc_type_typedef_struct_union_enum "$1";
 	grepc_type_typedef_underlying_struct_union_enum "$1";
 }
